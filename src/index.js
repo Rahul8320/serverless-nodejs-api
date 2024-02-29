@@ -5,6 +5,8 @@ const app = express();
 app.get("/", (req, res, next) => {
   return res.status(200).json({
     message: "Hello from root!",
+    debug: process.env.DEBUG === "1",
+    database_url: process.env.DATABASE_URL ?? "not present",
   });
 });
 
