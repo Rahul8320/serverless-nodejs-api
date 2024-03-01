@@ -1,12 +1,29 @@
 const serverless = require("serverless-http");
 const express = require("express");
-const app = express();
+const { neon, neonConfig } = require("@neondatabase/serverless");
 
-app.get("/", (req, res, next) => {
+const app = express();
+// env variable
+const DATABASE_URL = process.env.DATABASE_URL;
+
+async function dbClient() {
+  try {
+    console.log(`database: ${DATABASE_URL}`);
+    neonConfig.fetchConnectionCache = true;
+    const sql = neon(DATABASE_URL);
+    return sql;
+  } catch (error) {
+    console.error("An error occurred", error);
+  }
+}
+
+app.get("/", async (req, res, next) => {
+  const sql = await dbClient();
+  const [results] = await sql`select now();`;
+
   return res.status(200).json({
     message: "Hello from root!",
-    debug: process.env.DEBUG === "1",
-    database_url: process.env.DATABASE_URL ?? "not present",
+    results: results.now,
   });
 });
 
